@@ -1,1 +1,23 @@
-aa
+Réalise la migration ds données actuellement présent sur un bucket S3 d'AWS vers une DB mongoDB 
+
+Necessite un fichier secret.json tel que :
+
+```
+{
+    "AWS_ACCESS_KEY_ID": "ABCDEFGHAPI",
+    "AWS_SECRET_ACCESS_KEY": "abcdefghapiapiapiapiapiapi",
+    "AWS_REGION": "eu-north-1"
+}
+```
+placé dans le dossier /migration/
+
+
+Les scripts se lancent ainsi:
+```
+py xlsx.py Ichtegem --mongodb_address mongodb://localhost:27017/ -v INFO
+py xlsx.py Madeleine --mongodb_address mongodb://localhost:27017/ -v INFO
+py jsonl.py InfoClimat --mongodb_address mongodb://localhost:27017/ -v INFO
+```
+pour lancer la migration des 3 fichiers, avec les arguments optionnels :
+--mongodb_address : mongodb://localhost:27017/ par défaut. Addresse MongoDB
+-v : INFO par defaut, verbosité du logger
