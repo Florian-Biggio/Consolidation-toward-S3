@@ -1,0 +1,86 @@
+{
+    "$jsonSchema": {
+      "bsonType": "object",
+      "required": ["_id", "station", "datetime", "temperature_°C", "dew_point_°C", "humidity_%", "wind_dir", "wind_speed_kph", "wind_gust_kph", 
+                  "pressure_hPa","precip_rate_mm/hr", "solar_w/m²"],
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+          "description": "The unique identifier for the document (required)"
+        },
+        "station": {
+          "bsonType": "string",
+          "description" : "Station name, must be a string (required)"
+        },
+        "id_station": {
+          "bsonType": "string",
+          "description": "Station ID, must be a string"
+        },
+        "datetime": {
+          "bsonType": "date",
+          "description": "Datetime of the reading (required)"
+        },
+        "temperature_°C": {
+          "bsonType": ["int", "double"],
+          "description": "Temperature in Celsius, must be a number (required)"
+        },
+        "dew_point_°C": {
+          "bsonType": ["int", "double"],
+          "description": "Dew point in Celsius, must be a number (required)"
+        },
+        "humidity_%": {
+          "bsonType": ["int", "double"],
+          "description": "Humidity percentage, must be a number (required)"
+        },
+        "wind_dir": {
+          "bsonType": ["int", "double", "null"],
+          "description": "Wind direction in degrees, must be a number (required)"
+        },
+        "wind_speed_kph": {
+          "bsonType": ["int", "double"],
+          "description": "Average wind speed in m/s, must be a number (required)"
+        },
+        "wind_gust_kph": {
+          "bsonType": ["int", "double", "null"],
+          "description": "Wind gust speed in m/s, can be null if data not available"
+        },
+        "pressure_hPa": {
+          "bsonType": ["int", "double"],
+          "description": "Pressure in hPa, must be a number (required)"
+        },
+        "precip_rate_mm/hr": {
+          "bsonType": ["int", "double", "null"],
+          "description": "Rainfall in the last 1 hour, must be a number (required)"
+        },
+        "precip_rate_mm/hr (3hrs)": {
+          "bsonType": ["int", "double", "null"],
+          "description": "Rainfall in the last 3 hours, can be null if data not available"
+        },
+        "precip_accum_mm": {
+          "bsonType": ["int", "double", "null"],
+          "description": ""
+        },
+        "snow_depth_mm": {
+          "bsonType": ["int", "double", "null"],
+          "description": "Snow on the ground, can be null if data not available"
+        },
+        "visibility_m": {
+          "bsonType": ["int", "double", "null"],
+          "description": "Visibility in meters, can be null if data not available"
+        },
+        "cloud_coverage": {
+          "bsonType": ["string", "null"],
+          "description": "Cloudiness, can be an empty string if no data"
+        },
+        "solar_w/m²": {
+          "bsonType": ["int", "double", "string", "null"],
+          "description": ""
+        },
+        "uv_index": {
+          "bsonType": ["int", "double", "null"],
+          "description": ""
+        }
+      }
+    }
+  }
+  

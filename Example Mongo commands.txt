@@ -1,0 +1,40 @@
+db.weather_station.aggregate([
+  {$group: {_id: "$station",
+     mean_temperature: { $avg: "$temperature_°C" }}}])
+
+{
+  _id: 'Hazebrouck',
+  mean_temperature: 11.55623268698061
+}
+{
+  _id: 'Bergues',
+  mean_temperature: 12.42825484764543
+}
+{
+  _id: 'Ichtegem',
+  mean_temperature: 11.388362295945234
+}
+{
+  _id: 'Lille-Lesquin',
+  mean_temperature: 11.801666666666668
+}
+{
+  _id: 'Armentières',
+  mean_temperature: 11.957340720221607
+}
+{
+  _id: 'Madeleine',
+  mean_temperature: 11.913312368972745
+}
+
+
+
+
+
+db.weather_station.aggregate([
+  {$group: {_id: "$station", 
+      max_temperature: { $max: "$temperature_°C" },
+      min_temperature: { $min: "$temperature_°C" }}}])
+
+
+
