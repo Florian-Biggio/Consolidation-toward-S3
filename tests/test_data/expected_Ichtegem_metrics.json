@@ -1,0 +1,31 @@
+{
+    "migration_tag": "2025-04-11_16h29_Ichtegem",
+    "mongodb_address": "mongodb://localhost:27017/",
+    "row_count": 1899,
+    "columns": [
+        "station",
+        "datetime",
+        "temperature_°C",
+        "dew_point_°C",
+        "humidity_%",
+        "wind_dir",
+        "wind_speed_kph",
+        "wind_gust_kph",
+        "pressure_hPa",
+        "precip_rate_mm/hr",
+        "precip_accum_mm",
+        "uv_index",
+        "solar_w/m²",
+        "_id",
+        "migrated"
+    ],
+    "median_temperature_°C": 11.9,
+    "min_temperature_°C": 2.5,
+    "max_temperature_°C": 19.1,
+    "median_humidity_%": 87.0,
+    "min_humidity_%": 55.0,
+    "max_humidity_%": 98.0,
+    "median_pressure_hPa": 1005.1,
+    "min_pressure_hPa": 991.2,
+    "max_pressure_hPa": 1015.2
+}

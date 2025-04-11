@@ -10,20 +10,8 @@ from bson import ObjectId
 from datetime import datetime
 import hashlib
 import copy
-
-def load_secrets(file_path):
-    with open(file_path, 'r') as file:
-        return json.load(file)
-secrets = load_secrets('secrets.json')
-
-aws_access_key_id = secrets['AWS_ACCESS_KEY_ID']
-aws_secret_access_key = secrets['AWS_SECRET_ACCESS_KEY']
-aws_region = secrets['AWS_REGION']
-
-s3 = boto3.client('s3', 
-                  aws_access_key_id=aws_access_key_id, 
-                  aws_secret_access_key=aws_secret_access_key, 
-                  region_name=aws_region)
+import statistics
+import os
 
 parser = argparse.ArgumentParser(description="Process an Excel file")
 parser.add_argument(
@@ -53,19 +41,32 @@ log_level = getattr(logging, args.verbosity)
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
+def load_secrets(file_path):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(script_dir, file_path)
+    with open(full_path, 'r') as file:
+        return json.load(file)
+secrets = load_secrets('secrets.json')
+
+aws_access_key_id = secrets['AWS_ACCESS_KEY_ID']
+aws_secret_access_key = secrets['AWS_SECRET_ACCESS_KEY']
+aws_region = secrets['AWS_REGION']
+
+s3 = boto3.client('s3', 
+                  aws_access_key_id=aws_access_key_id, 
+                  aws_secret_access_key=aws_secret_access_key, 
+                  region_name=aws_region)
 
 mongodb_address = args.mongodb_address
 # After parsing arguments
 logger.info(f"Station: {args.file}")  
 logger.info(f"MongoDB adress: {mongodb_address}")  # Debug lines to check the parsed arguments
 
-
 if not args.file:
     args.file = ['InfoClimat']
 
 if args.file == 'InfoClimat':
     file_key = "greencoop-airbyte/Stations_meteorologiques_du_reseau_InfoClimat_(Bergues,_Hazebrouck,_Armentieres,_Lille-Lesquin)/2025_03_14_1741977939508_0.jsonl"
-
 
 bucket_name = 'greencoop-airbyte'
 s3_object = s3.get_object(Bucket=bucket_name, Key=file_key)
@@ -224,6 +225,38 @@ def generate_objectid(unique_str):
 for doc in processed_data:
     unique_str = str(doc['datetime']) + doc['station']
     doc['_id'] = generate_objectid(unique_str)
+
+migration_tag = f"{datetime.now().strftime('%Y-%m-%d_%Hh%M')}_{args.file}"
+
+for doc in processed_data:  # assuming data is a list of dicts
+    doc["migrated"] = migration_tag
+
+
+# Prepare info to make sure the data is rightly migrated
+numeric_keys = ["temperature_°C", "humidity_%", "pressure_hPa"]
+
+# Filter and flatten values
+metrics = {
+    "migration_tag": migration_tag,
+    "mongodb_address": mongodb_address,
+    "row_count": len(processed_data),
+}
+
+for key in numeric_keys:
+    values = [doc[key] for doc in processed_data if key in doc and isinstance(doc[key], (int, float)) and doc[key] is not None]
+    if values:
+        metrics[f"median_{key}"] = float(statistics.median(values))
+        metrics[f"min_{key}"] = float(min(values))
+        metrics[f"max_{key}"] = float(max(values))
+
+
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(script_dir, "..", "tests","test_data")
+file_path = os.path.join(data_dir, f"expected_{args.file}_metrics.json")
+
+with open(file_path, "w", encoding="utf-8") as f:
+    json.dump(metrics, f, indent=4, ensure_ascii=False)
 
 
 # Insert documents

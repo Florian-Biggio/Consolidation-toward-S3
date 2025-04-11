@@ -1,0 +1,14 @@
+{
+    "migration_tag": "2025-04-11_16h44_InfoClimat",
+    "mongodb_address": "mongodb://localhost:27017/",
+    "row_count": 1143,
+    "median_temperature_°C": 13.1,
+    "min_temperature_°C": 2.7,
+    "max_temperature_°C": 18.6,
+    "median_humidity_%": 87.0,
+    "min_humidity_%": 56.0,
+    "max_humidity_%": 100.0,
+    "median_pressure_hPa": 1005.5,
+    "min_pressure_hPa": 997.2,
+    "max_pressure_hPa": 1020.7
+}

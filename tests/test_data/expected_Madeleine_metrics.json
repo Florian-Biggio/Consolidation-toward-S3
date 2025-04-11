@@ -1,0 +1,31 @@
+{
+    "migration_tag": "2025-04-11_15h46_Madeleine",
+    "mongodb_address": "mongodb://localhost:27017/",
+    "row_count": 1908,
+    "columns": [
+        "station",
+        "datetime",
+        "temperature_°C",
+        "dew_point_°C",
+        "humidity_%",
+        "wind_dir",
+        "wind_speed_kph",
+        "wind_gust_kph",
+        "pressure_hPa",
+        "precip_rate_mm/hr",
+        "precip_accum_mm",
+        "uv_index",
+        "solar_w/m²",
+        "_id",
+        "migrated"
+    ],
+    "median_temperature_°C": 12.4,
+    "min_temperature_°C": 4.8,
+    "max_temperature_°C": 19.3,
+    "median_humidity_%": 80.0,
+    "min_humidity_%": 49.0,
+    "max_humidity_%": 96.0,
+    "median_pressure_hPa": 1012.5,
+    "min_pressure_hPa": 999.7,
+    "max_pressure_hPa": 1023.0
+}

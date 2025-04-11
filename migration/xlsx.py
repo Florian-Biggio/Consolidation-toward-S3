@@ -27,24 +27,6 @@ python xlsx.py [station_name]
 where `station_name` is either `Ichtegem` or `Madeleine` (don't include the brackets).
 If no station name is provided, the script will default to `Ichtegem`.
 """
-
-
-
-# Function to load the secrets from the local file
-def load_secrets(file_path):
-    if not os.path.exists(file_path):
-        logger.error(f"Error: {file_path} not found!")
-        sys.exit(1)
-    
-    with open(file_path, 'r') as file:
-        return json.load(file)
-
-secrets = load_secrets('secrets.json')
-
-aws_access_key_id = secrets['AWS_ACCESS_KEY_ID']
-aws_secret_access_key = secrets['AWS_SECRET_ACCESS_KEY']
-aws_region = secrets['AWS_REGION']
-
 parser = argparse.ArgumentParser(description="Process an Excel file")
 parser.add_argument(
     'file',
@@ -68,17 +50,28 @@ parser.add_argument(
     help="Set the logging verbosity level (default: INFO)"
 )
 
-
 args = parser.parse_args()
-
 
 log_level = getattr(logging, args.verbosity)
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
+
+def load_secrets(file_path):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(script_dir, file_path)
+    with open(full_path, 'r') as file:
+        return json.load(file)
+
+secrets = load_secrets('secrets.json')
+
+aws_access_key_id = secrets['AWS_ACCESS_KEY_ID']
+aws_secret_access_key = secrets['AWS_SECRET_ACCESS_KEY']
+aws_region = secrets['AWS_REGION']
+
 mongodb_address = args.mongodb_address
 # After parsing arguments
-logger.info(f"Station: {args.file}")  
+logger.info(f"Station: {args.file}")
 logger.info(f"MongoDB adress: {mongodb_address}")  # Debug lines to check the parsed arguments
 
 if not args.file:
@@ -233,6 +226,9 @@ final_df2 = final_df2[['station', 'datetime', 'temperature_°C', 'dew_point_°C'
          'wind_gust_kph', 'pressure_hPa', 'precip_rate_mm/hr', 'precip_accum_mm',  
          'uv_index', 'solar_w/m²',  '_id']]   
 
+migration_tag = f"{datetime.now().strftime('%Y-%m-%d_%Hh%M')}_{args.file}"
+final_df2["migrated"] = migration_tag
+
 # MongoDB setup
 client = MongoClient(mongodb_address)
 db = client["weather_data"]
@@ -240,6 +236,26 @@ collection = db["weather_station"]
 
 
 records = final_df2.to_dict(orient='records')
+
+# Prepare info to make sure the data is rightly migrated
+columns_of_interest = ["temperature_°C", "humidity_%", "pressure_hPa"]
+metrics = {
+    "migration_tag": migration_tag,
+    "mongodb_address": mongodb_address,
+    "row_count": len(final_df2),
+    "columns": final_df2.columns.tolist(),
+}
+for col in columns_of_interest:
+    if col in final_df2.columns:
+        metrics[f"median_{col}"] = float(final_df2[col].median())
+        metrics[f"min_{col}"] = float(final_df2[col].min())
+        metrics[f"max_{col}"] = float(final_df2[col].max())
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(script_dir, "..", "tests","test_data")
+file_path = os.path.join(data_dir, f"expected_{args.file}_metrics.json")
+
+
 
 # Insert documents
 try:

@@ -14,10 +14,20 @@ placé dans le dossier /migration/
 
 Les scripts se lancent ainsi:
 ```
-py xlsx.py Ichtegem --mongodb_address mongodb://localhost:27017/ -v INFO
-py xlsx.py Madeleine --mongodb_address mongodb://localhost:27017/ -v INFO
-py jsonl.py InfoClimat --mongodb_address mongodb://localhost:27017/ -v INFO
+py migration/xlsx.py Ichtegem --mongodb_address mongodb://localhost:27017/ -v INFO
+py migration/xlsx.py Madeleine --mongodb_address mongodb://localhost:27017/ -v INFO
+py migration/jsonl.py InfoClimat --mongodb_address mongodb://localhost:27017/ -v INFO
 ```
 pour lancer la migration des 3 fichiers, avec les arguments optionnels :
 --mongodb_address : mongodb://localhost:27017/ par défaut. Addresse MongoDB
 -v : INFO par defaut, verbosité du logger
+
+
+Après cette migration, il est possible de lancer des scripts de test pour vérifier que la migration s'est bien réalisée ainsi :
+
+```
+pytest -v --input Ichtegem
+pytest -v --input Madeleine
+pytest -v --input InfoClimat
+```
+
