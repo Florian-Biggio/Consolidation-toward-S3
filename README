@@ -1,3 +1,5 @@
+## Les scripts
+
 Réalise la migration ds données actuellement présent sur un bucket S3 d'AWS vers une DB mongoDB 
 
 Necessite un fichier secret.json tel que :
@@ -11,6 +13,12 @@ Necessite un fichier secret.json tel que :
 ```
 placé dans le dossier /migration/
 
+
+Pour forcer un schema sur notre future DB :
+```
+py migration/create_collection.py --mongodb_address mongodb://localhost:27017/ -v INFO
+```
+/!\ Drop la collection si elle existe
 
 Les scripts se lancent ainsi:
 ```
@@ -28,6 +36,72 @@ Après cette migration, il est possible de lancer des scripts de test pour véri
 ```
 pytest -v --input Ichtegem
 pytest -v --input Madeleine
-pytest -v --input InfoClimat
+pytest -v --input InfoClimat 
 ```
 
+## Docker image
+
+```
+docker build -t MigrationMongo .
+```
+Optionnel : pour (re)construire l'image Docker au nom de "MigrationMongo"
+
+```
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+
+
+# Setup le replicaset
+
+pour construire et lancer l'image docker du script et du mongoDB
+```
+docker exec -it migrationMongo1 mongo -u root -p example --authenticationDatabase admin
+```
+
+docker exec -it mongo1 bash
+mongo
+rs.status()
+db.stats()
+
+
+
+
+docker exec -it migrationMongo1 mongo
+
+rs.initiate()
+rs.add("migrationMongo2:27017")
+rs.add("migrationMongo-arbiter:27017")
+
+# Pour relancer manuellement les tests
+```
+docker run -it --rm --entrypoint /bin/bash migration
+```
+
+Lance l'image des scripts sans lancer les xcripts eux même
+
+
+## Upload vers AWS EC2
+
+# Create repo
+```
+aws ecr create-repository --repository-name mongo0 --region eu-north-1
+aws ecr create-repository --repository-name migration --region eu-north-1
+```
+
+# Tag both images
+```
+docker tag mongo:4.4 3333333.dkr.ecr.eu-north-1.amazonaws.com/mongo0:latest
+
+docker tag migration:latest 3333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+```
+
+Avec 3333333 ID AWS
+
+
+# Push both images
+```
+docker push 3333333.dkr.ecr.eu-north-1.amazonaws.com/mongo0:latest
+docker push 3333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+```

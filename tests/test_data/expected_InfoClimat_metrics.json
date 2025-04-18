@@ -1,5 +1,5 @@
 {
-    "migration_tag": "2025-04-11_16h44_InfoClimat",
+    "migration_tag": "2025-04-18_11h47_InfoClimat",
     "mongodb_address": "mongodb://localhost:27017/",
     "row_count": 1143,
     "median_temperature_°C": 13.1,

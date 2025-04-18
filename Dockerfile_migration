@@ -1,0 +1,30 @@
+FROM python:3.13-slim
+
+# Set working directory in the container
+WORKDIR /app
+
+# Install necessary system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*  # Clean up apt cache to reduce image size
+
+# Install Python dependencies
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Copy the migration scripts to the container
+COPY migration /app/migration
+
+# Copy the test scripts to the container
+COPY tests /app/tests
+
+# Copy the shell script to the container
+COPY run_migrations.sh /app/run_migrations.sh
+
+# Make the shell script executable
+RUN chmod +x /app/run_migrations.sh
+
+# Set the entry point to run the migration script
+CMD ["bash", "/app/run_migrations.sh"]

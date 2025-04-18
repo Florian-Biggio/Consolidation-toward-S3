@@ -1,0 +1,29 @@
+services:
+  mongo0:
+    image: mongo:4.4
+    container_name: mongo0
+    hostname: mongo0
+    volumes:
+      - ./mongo0/data:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - mongo-net
+    command: ["mongod", "--bind_ip_all", "--noauth"]
+
+
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile_migration
+    container_name: migration
+    hostname: migration
+    image: migration
+    depends_on:
+      - mongo0
+    networks:
+      - mongo-net
+
+networks:
+  mongo-net:
+    driver: bridge

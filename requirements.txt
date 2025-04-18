@@ -1,0 +1,11 @@
+pymongo==4.11
+boto3==1.37.13
+pandas==2.2.3
+pytest==8.3.5
+openpyxl==3.1.5
+
+# pip show pymongo | findstr Version
+# pip show boto3 | findstr Version
+# pip show pandas | findstr Version
+# pip show pytest | findstr Version
+# pip show openpyxl | findstr Version

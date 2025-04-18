@@ -1,3 +1,4 @@
+import os
 from pymongo import MongoClient, errors
 import argparse
 import json
@@ -23,8 +24,10 @@ try:
     db.drop_collection(collection_name)
     logger.info(f"Collection '{collection_name}' dropped (if it existed).")
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    schema_path = os.path.join(script_dir, 'schema.json')
     # Load schema from schema.json
-    with open('schema.json', 'r', encoding='utf-8') as schema_file:
+    with open(schema_path, 'r', encoding='utf-8') as schema_file:
         validation_schema = json.load(schema_file)
 
     # Create the collection with schema validation

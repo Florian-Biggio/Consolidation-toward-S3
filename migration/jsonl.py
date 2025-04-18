@@ -255,9 +255,11 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, "..", "tests","test_data")
 file_path = os.path.join(data_dir, f"expected_{args.file}_metrics.json")
 
-with open(file_path, "w", encoding="utf-8") as f:
-    json.dump(metrics, f, indent=4, ensure_ascii=False)
+# Ensure the directory exists
+os.makedirs(data_dir, exist_ok=True)
 
+with open(file_path, 'w', encoding='utf-8') as f:
+    json.dump(metrics, f, indent=4, ensure_ascii=False)
 
 # Insert documents
 try:
