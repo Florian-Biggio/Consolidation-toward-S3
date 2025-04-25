@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e  # stop on error
 
-MONGO_URI="mongodb://mongo0:27017/"
+MONGO_URI="${MONGO_URI:-mongodb://mongo1:27017/}"
 VERBOSITY="-v INFO"
 
 # Step 1: Create collection

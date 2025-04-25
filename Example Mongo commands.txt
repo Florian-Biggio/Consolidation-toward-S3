@@ -1,3 +1,6 @@
+use weather_data;
+
+
 db.weather_station.aggregate([
   {$group: {_id: "$station",
      mean_temperature: { $avg: "$temperature_°C" }}}])

@@ -1,6 +1,6 @@
-## Les scripts
+# Les scripts
 
-Réalise la migration ds données actuellement présent sur un bucket S3 d'AWS vers une DB mongoDB 
+Réalise la migration des données présentes sur un bucket S3 d'AWS vers une DB mongoDB 
 
 Necessite un fichier secret.json tel que :
 
@@ -28,6 +28,8 @@ py migration/jsonl.py InfoClimat --mongodb_address mongodb://localhost:27017/ -v
 ```
 pour lancer la migration des 3 fichiers, avec les arguments optionnels :
 --mongodb_address : mongodb://localhost:27017/ par défaut. Addresse MongoDB
+mongodb://mongo0:27017/ est l'adresse docker par defaut
+
 -v : INFO par defaut, verbosité du logger
 
 
@@ -42,66 +44,106 @@ pytest -v --input InfoClimat
 ## Docker image
 
 ```
-docker build -t MigrationMongo .
+docker build -t migration:latest -f Dockerfile_migration .
 ```
-Optionnel : pour (re)construire l'image Docker au nom de "MigrationMongo"
+Pour construire l'image docker des scripts de migration
 
-```
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-
-
-# Setup le replicaset
-
-pour construire et lancer l'image docker du script et du mongoDB
-```
-docker exec -it migrationMongo1 mongo -u root -p example --authenticationDatabase admin
-```
-
-docker exec -it mongo1 bash
-mongo
-rs.status()
-db.stats()
-
-
-
-
-docker exec -it migrationMongo1 mongo
-
-rs.initiate()
-rs.add("migrationMongo2:27017")
-rs.add("migrationMongo-arbiter:27017")
-
-# Pour relancer manuellement les tests
-```
-docker run -it --rm --entrypoint /bin/bash migration
-```
-
-Lance l'image des scripts sans lancer les xcripts eux même
-
+# EC2
 
 ## Upload vers AWS EC2
 
-# Create repo
+### Create repo
 ```
-aws ecr create-repository --repository-name mongo0 --region eu-north-1
 aws ecr create-repository --repository-name migration --region eu-north-1
 ```
 
-# Tag both images
+### Tag l'image
 ```
-docker tag mongo:4.4 3333333.dkr.ecr.eu-north-1.amazonaws.com/mongo0:latest
-
-docker tag migration:latest 3333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+docker tag migration:latest 333333333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
 ```
 
-Avec 3333333 ID AWS
+Avec *333333333333* ID AWS
 
 
-# Push both images
+### Push l'image
 ```
-docker push 3333333.dkr.ecr.eu-north-1.amazonaws.com/mongo0:latest
-docker push 3333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+docker push 333333333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+```
+
+## Log EC2
+```
+ssh -i C:/Users/Dev/Desktop/AWS/EC2_migration.pem ec2-user@12.34.567.89
+```
+
+### Premier lancement d'EC2
+```
+sudo yum update -y
+sudo yum install docker -y
+sudo service docker start
+sudo usermod -aG docker ec2-user
+
+exit
+```
+
+### Optionel : pull l'image de la migration
+
+```
+docker pull 333333333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+```
+
+### Lance mongo (et la migration)
+```
+docker-compose build
+```
+
+### Acceder la base mongo
+```
+docker exec -it mongo1 mongosh
+```
+
+#### Example de commange mongo
+```
+use weather_data;
+db.weather_station.aggregate([
+  {$group: {_id: "$station",
+     mean_temperature: { $avg: "$temperature_°C" }}}])
+db.weather_station.aggregate([
+  {$group: {_id: "$station", 
+      max_temperature: { $max: "$temperature_°C" },
+      min_temperature: { $min: "$temperature_°C" }}}])
+```
+
+### Check migration logs
+```
+docker logs migration
+```
+
+### Pour relancer manuellement les tests
+```
+docker run -it --rm --network bridge --entrypoint /bin/bash 333333333333.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+```
+
+Lance l'image des scripts sans lancer les scripts eux même
+Puis
+```
+pytest -v --input Ichtegem
+pytest -v --input Madeleine
+pytest -v --input InfoClimat 
+```
+
+
+### Stop instance ec2
+```
+aws ec2 stop-instances --instance-ids i-03f7ad7d9d1352c7d
+```
+
+### Start instance ec2 (change l'IP)
+```
+aws ec2 start-instances --instance-ids i-03f7ad7d9d1352c7d
+```
+
+puis relancer docker
+
+```
+sudo service docker start
 ```

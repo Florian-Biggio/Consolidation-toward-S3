@@ -1,0 +1,57 @@
+services:
+  mongo1:
+    image: mongo:latest
+    container_name: mongo1
+    ports:
+      - 27017:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - mongo-cluster
+
+  mongo2:
+    image: mongo:latest
+    container_name: mongo2
+    ports:
+      - 27018:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - mongo-cluster
+
+  arbiter:
+    image: mongo:latest
+    container_name: arbiter
+    ports:
+      - 27019:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - mongo-cluster
+
+  setup:
+    image: mongo:latest
+    container_name: mongo-setup
+    depends_on:
+      - mongo1
+      - mongo2
+      - arbiter
+    volumes:
+      - ./init-replica.sh:/init-replica.sh
+    entrypoint: ["bash", "-c", "sleep 10 && bash /init-replica.sh"]
+    networks:
+      - mongo-cluster
+    restart: "no"
+
+  migration:
+    image: 985539791615.dkr.ecr.eu-north-1.amazonaws.com/migration:latest
+    container_name: migration
+    environment:
+      - MONGO_URI=mongodb://mongo1:27017,mongo2:27017,arbiter:27017/?replicaSet=rs0
+    networks:
+      - mongo-cluster
+    depends_on:
+      - mongo1
+      - mongo2
+      - arbiter
+
+networks:
+  mongo-cluster:
+    driver: bridge
